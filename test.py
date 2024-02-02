@@ -1,30 +1,28 @@
 import psutil
 import colorama
 import os
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-import win32api
-import win32file
 import wmi
-import pygame
 import pyaudio
-from pygame import mixer
 import time
 import sounddevice as sd
 import subprocess
 from termcolor import colored
-import socket
 import requests
-import bluetooth
-import speech_recognition as sr
-from fuzzywuzzy import fuzz
 import wave
 import keyboard
 
-os.system("cls")
-colorama.init()
+
+#Начало записи времени работы
+start = time.time()
+
+
+
 # Автор кода 
-print("After: NoFranxx")
-# Оперативная память
+print(colorama.Fore.MAGENTA + "After: NoFranxx")
+
+
+
+#Проверка объёма оперативной памяти
 memory_usage = psutil.virtual_memory().total
 
 ram_size = psutil.virtual_memory().total  # total RAM size in bytes
@@ -33,31 +31,13 @@ if ram_size > 12 * 10 ** 9:
     print(colorama.Fore.GREEN + "Memory_GOOD")
 else:
     print(colorama.Fore.RED + "Memory_Fail")
-    
- #вывод дисков v.2
-drive_types = {
-                win32file.DRIVE_UNKNOWN : "Unknown\nDrive type can't be determined.",
-                win32file.DRIVE_REMOVABLE : "Removable\nDrive has removable media. This includes all floppy drives and many other varieties of storage devices.",
-                win32file.DRIVE_FIXED : "Fixed\nDrive has fixed (nonremovable) media. This includes all hard drives, including hard drives that are removable.",
-                win32file.DRIVE_REMOTE : "Remote\nNetwork drives. This includes drives shared anywhere on a network.",
-                win32file.DRIVE_CDROM : "CDROM\nDrive is a CD-ROM. No distinction is made between read-only and read/write CD-ROM drives.",
-                win32file.DRIVE_RAMDISK : "RAMDisk\nDrive is a block of random access memory (RAM) on the local computer that behaves like a disk drive.",
-                win32file.DRIVE_NO_ROOT_DIR : "The root directory does not exist."
-              }
 
-drives = win32api.GetLogicalDriveStrings().split('\x00')[:-1]
-
-for device in drives:
-    type = win32file.GetDriveType(device)
-    
-#    print(colorama.Fore.WHITE +"Drive: %s" % device)
-    
 # отображение кол-ва дисков
 c = wmi.WMI()
 
 disk_devices = c.Win32_LogicalDisk()
 print("Количество накопителей: %s" % len(disk_devices))
-if len(disk_devices) > 3 :
+if len(disk_devices) > 4 :
     print(colorama.Fore.GREEN + "Storage_GOOD")
 else:
     print(colorama.Fore.RED + "Storage_Fail")
@@ -71,26 +51,31 @@ def check_microphone(input_data, frames, time, status):
   print(colorama.Fore.RED + "Micro_Fail")
 
 # Задаем параметры для записи звука
-duration = 10  # Длительность записи в секундах
-sample_rate = 44100  # Частота дискретизации звука
+duration = 10
+sample_rate = 44100
 
 # Запускаем запись звука с микрофона
 with sd.InputStream(callback=check_microphone, channels=1, samplerate=sample_rate):
     sd.sleep(duration * 5)
     
-    # количество сетей Wi-Fi
+ 
+ 
+ 
+ 
+ # количество сетей Wi-Fi
 def get_wifi_networks():
     try:
         result = subprocess.check_output(["netsh", "wlan", "show", "network"], encoding='cp866')
         networks = result.split("\n")
-        return len(networks) - 6  # Исключаем заголовки и пустые строки
+        return len(networks) - 6  
     except subprocess.CalledProcessError:
         return 0
+
 
 # Получаем количество сетей Wi-Fi
 count = get_wifi_networks()
 
-if count > 5:
+if count > 1:
     message = colored("GOOD", "green")
 elif count == 0:
     message = colored("BAD", "red")
@@ -99,8 +84,12 @@ else:
 
 print(f"Wi-Fi {message}")
  
-# проверка Ethernet
-url = "http://yandex.ru/"
+
+
+
+# проверка Ethernet AOI (yandex.ru)
+#url = "https://10.255.90.10/login/"
+url = "https://yandex.ru/"
 
 try:
     response = requests.get(url)
@@ -109,58 +98,67 @@ try:
     else:
         print(colorama.Fore.RED + "Ethernet_Bad")
 except requests.ConnectionError:
-    print("Bad")
+    print(colorama.Fore.RED + "Ethernet_Bad")
+
     
+
+
+    # проверка Ethernet server
+url = "https://10.255.90.11/"
+
+try:
+    response = requests.get(url)
+    if response.status_code == 200:
+        print(colorama.Fore.GREEN + "Ethernet_Good")
+    else:
+        print(colorama.Fore.RED + "Ethernet_Bad")
+except requests.ConnectionError:
+    print(colorama.Fore.RED + "Ethernet_Bad")
+
+
+
+
 # Bluetooth
-# Получаем список сетей Bluetooth
-devices = bluetooth.discover_devices()
+import subprocess
+exe_file_path = 'C:/test/test_BT.exe'
+result = subprocess.run(exe_file_path, capture_output=True, text=True)
 
-# Получаем количество сетей Bluetooth
-num_devices = len(devices)
+# Проверяем, выдаёт ли файл сообщение "1,2,3" (Это количество сетей bluetooth, которые нашёл файл test_BT.exe)
+output = result.stdout.strip()
+if output == '1':
+    print(colorama.Fore.GREEN + 'Bluetooth_Good')
+elif output == '2' or output == '3':
+    print(colorama.Fore.GREEN + 'Bluetooth_Good')
+else:
+   print(colorama.Fore.RED + 'Bluetooth_Bad')
 
-# Проверяем количество сетей и выводим соответствующее сообщение
-if num_devices > 0:
-    print(colorama.Fore.GREEN + "Bluetooth_Good")
-elif num_devices == 0:
-    print(colorama.Fore.RED + "Bluetooth_Bad")
 
 
-##### Проверка звука (человеком)    
-import pyaudio
-import wave
-import keyboard
 
-# Функция воспроизведения .wav файла
+
+
+# Проверка звука (человеком)    
 def play_wave(file_path):
-    # Открытие файла
     wf = wave.open(file_path, 'rb')
 
-    # Создание объекта PyAudio
     p = pyaudio.PyAudio()
-
-    # Открытие потока
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
                     channels=wf.getnchannels(),
                     rate=wf.getframerate(),
                     output=True)
-
-    # Чтение данных
     data = wf.readframes(1024)
 
-    # Воспроизведение потока
     while len(data) > 0:
         stream.write(data)
         data = wf.readframes(1024)
 
-    # Остановка потока и очистка ресурсов
     stream.stop_stream()
     stream.close()
     p.terminate()
 
-# Путь к .wav файлу
-file_path = 'C:/Users/NoFranxx JOB/Desktop/JOB_Programm/444/test/LRC.WAV'
+file_path = 'C:/test/LRC.WAV'
 
-print(colorama.Fore.WHITE + "Нажмите 'Y' для воспроизведения или 'Enter' для выхода.")
+print(colorama.Fore.WHITE + "Нажмите 'Y' для воспроизведения звука, нажмите 'Enter' для продолжения.")
 
 # Ожидание событий клавиатуры
 while True:
@@ -170,7 +168,9 @@ while True:
         print(colorama.Fore.GREEN + "Volume_GOOD")
         break
 
-#Проверка  микрофона сток
+
+
+#Проверка  микрофона наушники
 def check_microphone(input_data, frames, time, status):
  if any(input_data > 0):
     if len(input_data) > 3 :
@@ -178,21 +178,25 @@ def check_microphone(input_data, frames, time, status):
  else:
   print(colorama.Fore.RED + "Micro_Fail")
 
-# Задаем параметры для записи звука
-duration = 10  # Длительность записи в секундах
-sample_rate = 44100  # Частота дискретизации звука
+duration = 10
+sample_rate = 44100
 
-# Запускаем запись звука с микрофона
 with sd.InputStream(callback=check_microphone, channels=1, samplerate=sample_rate):
     sd.sleep(duration * 5)
 
-
-
-# Ваш остальной код здесь
+input(colorama.Fore.BLACK + "")
 
 
 
-## Проверка звука + Микро (Автоматически)
+# Ввод серийного номера
+user_input = input(colorama.Fore.WHITE + "Введите Serial Number: ")
+
+with open("C:/test/test.txt", "a") as file:
+    file.write("\n" + "Валерий_test: " + user_input)
+
+print(colorama.Fore.GREEN + "Серийный номер сохранён в test.txt.")
+
+## Проверка звука + Микро (Автоматически)                       BETA
 # Создаем объект Recognizer
 #r = sr.Recognizer()
 #pygame.init()
@@ -208,20 +212,42 @@ with sd.InputStream(callback=check_microphone, channels=1, samplerate=sample_rat
     
 
 #try:
-    # Распознаем голос с помощью Google Web Speech API
+#Распознаем голос с помощью Google Web Speech API
 #    text = r.recognize_google(audio, language="ru-RU")
 #    print("Вы сказали: " + text)
 
-#     Сравниваем распознанную фразу с эталонной фразой "left right" с помощью fuzzywuzzy
+#Сравниваем распознанную фразу с эталонной фразой "left right" 
 #    ratio = fuzz.ratio(text.lower(), "left right")
 #    if ratio >= 80:  # Устанавливаем порог точности сравнения
 #        print(colorama.Fore.GREEN + "Speakers_Micro_GOOD")
 #except sr.UnknownValueError:
-#    print("Не удалось распознать голос")
+#    print("Не удалось распознать фразу")
 #except sr.RequestError as e:
 #    print("Ошибка при запросе к сервису распознавания голоса: {0}".format(e))
-    
-input("")    
+
+
+
+
+# Окончание работы программы/запись времени работы
+end = time.time()
+print(colorama.Fore.BLACK + "Execution time of the program is- ", end-start)
+
+with open("C:/test/test_time.txt", "a") as file:
+    file.write("\n" + "Валерий_test: " + str(end-start))
+
+print(colorama.Fore.BLACK + "Время работы записано в test_time.txt.")
+
 input("")    
 
-#стабильный вариант на 26.01.2023.aa
+#стабильный вариант на 29.01.2023. (Готовый) (не забудь добавить в "C:/test/" все необходимые файлы: test_time.txt; test.txt; LRC.WAV )
+
+
+
+#Необходимо добавить 
+
+#Автозагрузку в системе
+#Автовыключение системы после теста, если он пройден успешно
+#Добавить ошибку в систему (автоматически), отдельный excel файл
+#Ускорить время работы
+#Исправить bag ethernet порта (необходимо протестировать именно к адресу сервера и aoi)
+#Изменить проверку микрофона, считаю, что можно использовать фразу, к примеру "test"

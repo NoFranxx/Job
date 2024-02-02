@@ -10,9 +10,14 @@ from termcolor import colored
 import requests
 import wave
 import keyboard
+os.system("cls")
+colorama.init()
 
 
-#Начало записи времени работы
+
+
+
+# Начало записи времени работы
 start = time.time()
 
 
@@ -22,17 +27,17 @@ print(colorama.Fore.MAGENTA + "After: NoFranxx")
 
 
 
-#Проверка объёма оперативной памяти
+# Проверка объёма оперативной памяти
 memory_usage = psutil.virtual_memory().total
 
-ram_size = psutil.virtual_memory().total  # total RAM size in bytes
+ram_size = psutil.virtual_memory().total
 
 if ram_size > 12 * 10 ** 9: 
     print(colorama.Fore.GREEN + "Memory_GOOD")
 else:
     print(colorama.Fore.RED + "Memory_Fail")
 
-# отображение кол-ва дисков
+# Отображение кол-ва дисков
 c = wmi.WMI()
 
 disk_devices = c.Win32_LogicalDisk()
@@ -42,7 +47,7 @@ if len(disk_devices) > 4 :
 else:
     print(colorama.Fore.RED + "Storage_Fail")
  
-#Проверка  микрофона сток
+# Проверка  микрофона сток
 def check_microphone(input_data, frames, time, status):
  if any(input_data > 0):
     if len(input_data) > 3 :
@@ -50,19 +55,14 @@ def check_microphone(input_data, frames, time, status):
  else:
   print(colorama.Fore.RED + "Micro_Fail")
 
-# Задаем параметры для записи звука
 duration = 10
 sample_rate = 44100
 
-# Запускаем запись звука с микрофона
 with sd.InputStream(callback=check_microphone, channels=1, samplerate=sample_rate):
     sd.sleep(duration * 5)
     
  
- 
- 
- 
- # количество сетей Wi-Fi
+# Количество сетей Wi-Fi
 def get_wifi_networks():
     try:
         result = subprocess.check_output(["netsh", "wlan", "show", "network"], encoding='cp866')
@@ -87,7 +87,7 @@ print(f"Wi-Fi {message}")
 
 
 
-# проверка Ethernet AOI (yandex.ru)
+# Проверка Ethernet AOI ()
 #url = "https://10.255.90.10/login/"
 url = "https://yandex.ru/"
 
@@ -103,7 +103,7 @@ except requests.ConnectionError:
     
 
 
-    # проверка Ethernet server
+# Проверка Ethernet server
 url = "https://10.255.90.11/"
 
 try:
@@ -170,7 +170,7 @@ while True:
 
 
 
-#Проверка  микрофона наушники
+# Проверка  микрофона наушники
 def check_microphone(input_data, frames, time, status):
  if any(input_data > 0):
     if len(input_data) > 3 :
@@ -197,7 +197,6 @@ with open("C:/test/test.txt", "a") as file:
 print(colorama.Fore.GREEN + "Серийный номер сохранён в test.txt.")
 
 ## Проверка звука + Микро (Автоматически)                       BETA
-# Создаем объект Recognizer
 #r = sr.Recognizer()
 #pygame.init()
 #pygame.mixer.music.load("LRC.mp3")
@@ -250,4 +249,4 @@ input("")
 #Добавить ошибку в систему (автоматически), отдельный excel файл
 #Ускорить время работы
 #Исправить bag ethernet порта (необходимо протестировать именно к адресу сервера и aoi)
-#Изменить проверку микрофона, считаю, что можно использовать фразу, к примеру "test"
+#Изменить проверку микрофона на другую, например что прохождения теста, микрофон должен распознать слово "test"
